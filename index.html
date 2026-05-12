@@ -1,0 +1,3064 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Xsens DOT Knee Angle Streamer</title>
+    <style>
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #eef2f7;
+  color: #111827;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: radial-gradient(circle at top left, #dbeafe 0, transparent 32rem), #eef2f7;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  max-width: 100%;
+}
+
+button,
+select,
+input[type="text"] {
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1;
+  padding: 0.75rem 0.95rem;
+  background: #ffffff;
+  width: 100%;
+}
+
+select,
+input {
+  min-width: 0;
+}
+
+select {
+  width: 100%;
+}
+
+input[type="text"] {
+  color: #111827;
+}
+
+input[type="range"] {
+  width: 100%;
+}
+
+button {
+  cursor: pointer;
+  border-color: #1f6feb;
+  background: #1f6feb;
+  color: #ffffff;
+  font-weight: 700;
+  transition: transform 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0.5rem 1.1rem rgba(31, 111, 235, 0.18);
+}
+
+button.secondary {
+  background: #ffffff;
+  color: #1f2937;
+  border-color: #cbd5e1;
+}
+
+#app {
+  width: min(1180px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 1.5rem 0 3rem;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 4.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+  max-width: 780px;
+}
+
+h2 {
+  font-size: 1.1rem;
+}
+
+.lede {
+  color: #4b5563;
+  margin-top: 0.8rem;
+  max-width: 780px;
+  line-height: 1.5;
+}
+
+.eyebrow {
+  color: #2563eb;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.13em;
+  font-weight: 800;
+  margin-bottom: 0.35rem;
+}
+
+.hero-status,
+.status-pill {
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #475569;
+}
+
+.hero-status[data-state="ok"],
+.status-pill[data-state="connected"] {
+  border-color: #9ae6b4;
+  background: #f0fff4;
+  color: #166534;
+}
+
+.status-pill[data-state="streaming"] {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.hero-status[data-state="error"],
+.status-pill[data-state="disconnected"] {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1.35fr 0.9fr;
+  gap: 1rem;
+}
+
+.panel {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1rem 3rem rgba(15, 23, 42, 0.08);
+  padding: 1rem;
+}
+
+.live-panel {
+  grid-row: span 3;
+}
+
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.metric-grid div {
+  border-radius: 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.8rem;
+}
+
+.metric-grid span,
+dt {
+  display: block;
+  color: #64748b;
+  font-size: 0.8rem;
+  margin-bottom: 0.35rem;
+}
+
+.metric-grid strong,
+dd {
+  margin: 0;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+canvas {
+  width: 100%;
+  height: 260px;
+  border-radius: 1rem;
+  border: 1px solid #dbe3ef;
+  overflow: hidden;
+}
+
+.logging-bar {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  border-radius: 1rem;
+  border: 1px solid #dbe3ef;
+  background: #f8fafc;
+  padding: 1rem;
+}
+
+.logging-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.inline-status {
+  white-space: nowrap;
+  align-self: flex-start;
+  margin: 0;
+  font-weight: 800;
+}
+
+.inline-status[hidden] {
+  display: none !important;
+}
+
+.inline-status[data-state="active"],
+.inline-status[data-state="success"] {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #166534;
+}
+
+.inline-status[data-state="info"] {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.inline-status[data-state="error"] {
+  background: #fee2e2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.logging-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.button-grid.logging-actions {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.controls-panel,
+.sensor-card {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.control-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.control-row label,
+.checkbox-row {
+  color: #475569;
+  font-weight: 700;
+}
+
+.range-row {
+  display: grid;
+  grid-template-columns: 1fr 3.5rem;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.range-row strong {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.sensor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+dl {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+dl div {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+
+.hint {
+  color: #64748b;
+  line-height: 1.45;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 1050px) {
+  .button-grid.logging-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .hero,
+  .layout {
+    display: block;
+  }
+
+  .hero-status,
+  .panel {
+    margin-top: 1rem;
+  }
+
+}
+
+@media (max-width: 720px) {
+  .logging-header,
+  .logging-form,
+  .button-grid.logging-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .logging-header {
+    display: grid;
+  }
+
+  .inline-status {
+    white-space: normal;
+    width: fit-content;
+  }
+}
+
+@media (max-width: 560px) {
+  #app {
+    width: min(100% - 1rem, 1180px);
+  }
+
+  .metric-grid,
+  .button-grid,
+  dl div,
+  .range-row {
+    grid-template-columns: 1fr;
+  }
+
+  .range-row strong {
+    text-align: left;
+  }
+}
+
+.battery-value[data-state="ok"] {
+  color: #166534;
+}
+
+.battery-value[data-state="warn"] {
+  color: #a16207;
+}
+
+.battery-value[data-state="low"] {
+  color: #b91c1c;
+}
+
+.battery-value[data-state="charging"] {
+  color: #1d4ed8;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+
+input[type="number"],
+input[type="file"] {
+  border-radius: 0.75rem;
+  border: 1px solid #cbd5e1;
+  padding: 0.75rem 0.95rem;
+  background: #ffffff;
+  color: #111827;
+  width: 100%;
+}
+
+.analysis-bar {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 1rem;
+  border-radius: 1rem;
+  border: 1px solid #dbe3ef;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+
+.analysis-header {
+  display: block;
+}
+
+.analysis-status {
+  justify-self: start;
+  width: fit-content;
+}
+
+.analysis-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.analysis-form .control-row {
+  min-width: 0;
+}
+
+.analysis-form .control-row label {
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.analysis-form select,
+.analysis-form input {
+  min-width: 0;
+}
+
+.file-control {
+  grid-column: 1 / -1;
+}
+
+.button-grid.analysis-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.analysis-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.75rem;
+}
+
+.analysis-summary-card {
+  border-radius: 0.9rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 0.75rem;
+}
+
+.analysis-summary-card span {
+  display: block;
+  color: #64748b;
+  font-size: 0.78rem;
+  margin-bottom: 0.35rem;
+}
+
+.analysis-summary-card strong {
+  display: block;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.15rem;
+}
+
+.analysis-figure {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  padding: 0.75rem;
+}
+
+.analysis-figure-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: baseline;
+  margin-bottom: 0.65rem;
+}
+
+h3 {
+  margin: 0;
+  font-size: 0.98rem;
+}
+
+.analysis-chart {
+  height: 320px;
+  background: #ffffff;
+}
+
+.analysis-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.9rem;
+  background: #ffffff;
+}
+
+.analysis-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 940px;
+  font-size: 0.88rem;
+}
+
+.analysis-table th,
+.analysis-table td {
+  padding: 0.65rem 0.7rem;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.analysis-table th:first-child,
+.analysis-table td:first-child {
+  text-align: left;
+}
+
+.analysis-table thead th {
+  color: #475569;
+  background: #f8fafc;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.analysis-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+@media (max-width: 720px) {
+  .analysis-form,
+  .button-grid.analysis-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .file-control {
+    grid-column: 1;
+  }
+
+  .analysis-figure-header {
+    display: grid;
+  }
+}
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Xsens / Movella DOT</p>
+          <h1>Live knee flexion/extension angle</h1>
+          <p class="lede">
+            Connect one DOT to the thigh and one DOT to the shank. The app streams Euler orientation, takes the selected pitch axis, and computes the relative knee angle.
+          </p>
+        </div>
+        <div class="hero-status" id="browserSupport">Checking browser Bluetooth support...</div>
+      </header>
+
+      <main class="layout">
+        <section class="panel live-panel">
+          <div class="metric-grid">
+            <div>
+              <span>Thigh pitch</span>
+              <strong id="thighPitch">--.- deg</strong>
+            </div>
+            <div>
+              <span>Shank pitch</span>
+              <strong id="shankPitch">--.- deg</strong>
+            </div>
+            <div>
+              <span>Raw thigh - shank</span>
+              <strong id="rawAngle">--.- deg</strong>
+            </div>
+            <div>
+              <span>Unfiltered knee</span>
+              <strong id="unfilteredAngle">--.- deg</strong>
+            </div>
+            <div>
+              <span>Zero offset</span>
+              <strong id="zeroOffset">0.0 deg</strong>
+            </div>
+            <div>
+              <span>Thigh battery</span>
+              <strong id="thighBatteryMetric" class="battery-value">--</strong>
+            </div>
+            <div>
+              <span>Shank battery</span>
+              <strong id="shankBatteryMetric" class="battery-value">--</strong>
+            </div>
+          </div>
+          <canvas id="angleChart" width="900" height="260" aria-label="knee angle chart"></canvas>
+
+          <section class="logging-bar" aria-labelledby="loggingTitle">
+            <div class="logging-header">
+              <div>
+                <h2 id="loggingTitle">Logging and testing</h2>
+                <p class="hint">Choose a folder when supported, name the CSV, then save directly or fall back to browser download.</p>
+              </div>
+              <p class="status-pill inline-status" id="logStatus" hidden></p>
+            </div>
+
+            <div class="logging-form">
+              <div class="control-row">
+                <label for="sessionNameInput">Session / participant name</label>
+                <input id="sessionNameInput" type="text" placeholder="e.g. P01_walk_trial_01" autocomplete="off" />
+              </div>
+              <div class="control-row">
+                <label for="fileNameInput">CSV file name</label>
+                <input id="fileNameInput" type="text" autocomplete="off" />
+              </div>
+            </div>
+
+            <div class="button-grid logging-actions">
+              <button id="logBtn" type="button">Start CSV logging</button>
+              <button id="chooseFolderBtn" type="button" class="secondary">Choose save folder</button>
+              <button id="downloadBtn" type="button" class="secondary">Save CSV</button>
+              <button id="mockBtn" type="button" class="secondary">Start mock stream</button>
+              <button id="clearBtn" type="button" class="secondary">Clear chart</button>
+            </div>
+            <p class="hint" id="folderStatus">No folder selected. Save CSV will use the browser download flow.</p>
+          </section>
+
+          <section class="analysis-bar" aria-labelledby="analysisTitle">
+            <div class="logging-header analysis-header">
+              <div>
+                <h2 id="analysisTitle">Analyze saved CSV</h2>
+                <p class="hint">Load a saved log, use the filtered knee angle, and auto-detect leg-extension repetitions.</p>
+              </div>
+            </div>
+
+            <div class="analysis-form">
+              <div class="control-row file-control">
+                <label for="analysisFileInput">Saved CSV file</label>
+                <input id="analysisFileInput" type="file" accept=".csv,text/csv" />
+              </div>
+              <div class="control-row">
+                <label for="flexionDirectionSelect">Flexion convention</label>
+                <select id="flexionDirectionSelect">
+                  <option value="higher">Higher angle = more flexion</option>
+                  <option value="lower" selected>Lower angle = more flexion</option>
+                </select>
+              </div>
+              <div class="control-row">
+                <label for="minRomInput">Minimum ROM per rep (deg)</label>
+                <input id="minRomInput" type="number" min="1" max="180" step="1" value="10" />
+              </div>
+              <div class="control-row">
+                <label for="minRepDurationInput">Minimum rep duration (s)</label>
+                <input id="minRepDurationInput" type="number" min="0.1" max="20" step="0.1" value="0.5" />
+              </div>
+              <div class="control-row">
+                <label for="analysisSmoothingInput">Analysis smoothing window (samples)</label>
+                <input id="analysisSmoothingInput" type="number" min="1" max="101" step="2" value="9" />
+              </div>
+              <div class="control-row">
+                <label for="movementThresholdInput">Movement speed threshold (deg/s)</label>
+                <input id="movementThresholdInput" type="number" min="0" max="200" step="1" value="10" />
+              </div>
+            </div>
+
+            <div class="button-grid analysis-actions">
+              <button id="analyzeFileBtn" type="button">Analyze selected CSV</button>
+              <button id="analyzeCurrentLogBtn" type="button" class="secondary">Analyze current log</button>
+              <button id="exportAnalysisBtn" type="button" class="secondary" disabled>Save analysis CSV</button>
+            </div>
+            <p class="status-pill inline-status analysis-status" id="analysisStatus" aria-live="polite" hidden></p>
+
+            <div class="analysis-summary" id="analysisSummary" aria-live="polite"></div>
+
+            <div class="analysis-figure">
+              <div class="analysis-figure-header">
+                <h3>Detection sanity check</h3>
+                <p class="hint">Filtered knee angle with velocity-based movement phases and hold/rest periods.</p>
+              </div>
+              <canvas id="analysisChart" class="analysis-chart" width="900" height="300" aria-label="detected knee flexion and extension phases"></canvas>
+              <p class="hint analysis-legend-text">Blue and green mark velocity-based extension and flexion phases. Gray marks hold/rest. Markers show extension/flexion start and end points.</p>
+            </div>
+
+            <div class="analysis-table-wrap">
+              <table class="analysis-table" id="analysisTable">
+                <thead>
+                  <tr>
+                    <th>Rep</th>
+                    <th>Ext. start</th>
+                    <th>Ext. end</th>
+                    <th>Ext. ROM</th>
+                    <th>Flex. start</th>
+                    <th>Flex. end</th>
+                    <th>Flex. ROM</th>
+                    <th>Rep ROM</th>
+                    <th>Mean ext. angular speed</th>
+                    <th>Mean flex. angular speed</th>
+                    <th>Mean movement angular speed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="11">Analyze a CSV to see per-repetition metrics.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="panel controls-panel">
+          <h2>Setup</h2>
+          <div class="control-row">
+            <label for="axisSelect">Pitch axis</label>
+            <select id="axisSelect">
+              <option value="y" selected>Y / pitch</option>
+              <option value="x">X</option>
+              <option value="z">Z</option>
+            </select>
+          </div>
+          <div class="control-row">
+            <label for="smoothingRange">Angle smoothing</label>
+            <div class="range-row">
+              <input id="smoothingRange" type="range" min="0" max="95" step="5" value="70" />
+              <strong id="smoothingValue">70%</strong>
+            </div>
+            <p class="hint">Higher smoothing reduces jitter but adds more delay. Use 50-80% for a first gait test.</p>
+          </div>
+          <label class="checkbox-row">
+            <input id="invertSign" type="checkbox" />
+            Invert sign
+          </label>
+          <label class="checkbox-row">
+            <input id="autoStart" type="checkbox" checked />
+            Start streaming after connection
+          </label>
+          <div class="button-grid">
+            <button id="calibrateBtn" type="button">Calibrate zero</button>
+            <button id="resetZeroBtn" type="button">Reset zero</button>
+            <button id="resetFilterBtn" type="button" class="secondary">Reset filter</button>
+            <button id="startAllBtn" type="button">Start both</button>
+            <button id="stopAllBtn" type="button" class="secondary">Stop both</button>
+          </div>
+          <p class="hint">
+            Place the knee in your reference posture, then click <strong>Calibrate zero</strong>. For gait, a standing neutral pose is a good first reference.
+          </p>
+        </section>
+
+        <section class="sensor-card panel" data-segment="thigh">
+          <div class="sensor-header">
+            <div>
+              <p class="eyebrow">Sensor 1</p>
+              <h2>Thigh DOT</h2>
+            </div>
+            <span class="status-pill" id="thighStatus">Disconnected</span>
+          </div>
+          <dl>
+            <div><dt>Name</dt><dd id="thighName">--</dd></div>
+            <div><dt>Sensor timestamp</dt><dd id="thighTs">--</dd></div>
+            <div><dt>Euler X/Y/Z</dt><dd id="thighEuler">--</dd></div>
+            <div><dt>Battery</dt><dd id="thighBattery" class="battery-value">--</dd></div>
+          </dl>
+          <div class="button-grid">
+            <button id="connectThighBtn" type="button">Connect thigh</button>
+            <button id="startThighBtn" type="button">Start</button>
+            <button id="stopThighBtn" type="button" class="secondary">Stop</button>
+          </div>
+        </section>
+
+        <section class="sensor-card panel" data-segment="shank">
+          <div class="sensor-header">
+            <div>
+              <p class="eyebrow">Sensor 2</p>
+              <h2>Shank DOT</h2>
+            </div>
+            <span class="status-pill" id="shankStatus">Disconnected</span>
+          </div>
+          <dl>
+            <div><dt>Name</dt><dd id="shankName">--</dd></div>
+            <div><dt>Sensor timestamp</dt><dd id="shankTs">--</dd></div>
+            <div><dt>Euler X/Y/Z</dt><dd id="shankEuler">--</dd></div>
+            <div><dt>Battery</dt><dd id="shankBattery" class="battery-value">--</dd></div>
+          </dl>
+          <div class="button-grid">
+            <button id="connectShankBtn" type="button">Connect shank</button>
+            <button id="startShankBtn" type="button">Start</button>
+            <button id="stopShankBtn" type="button" class="secondary">Stop</button>
+          </div>
+        </section>
+      </main>
+    </div>
+    <script type="module">
+// ===== xsensDot.js =====
+const UUIDS = Object.freeze({
+  configurationService: '15171000-4947-11e9-8646-d663bd873d93',
+  measurementService: '15172000-4947-11e9-8646-d663bd873d93',
+  batteryService: '15173000-4947-11e9-8646-d663bd873d93',
+  measurementControl: '15172001-4947-11e9-8646-d663bd873d93',
+  longPayload: '15172002-4947-11e9-8646-d663bd873d93',
+  mediumPayload: '15172003-4947-11e9-8646-d663bd873d93',
+  shortPayload: '15172004-4947-11e9-8646-d663bd873d93',
+  batteryCharacteristic: '15173001-4947-11e9-8646-d663bd873d93',
+});
+
+const PAYLOAD_MODE = Object.freeze({
+  ORIENTATION_EULER: 4,
+});
+
+const BATTERY_POLL_INTERVAL_MS = 60_000;
+
+function browserSupportsWebBluetooth() {
+  return typeof navigator !== 'undefined' && Boolean(navigator.bluetooth);
+}
+
+function asDataView(value) {
+  if (value instanceof DataView) return value;
+  if (value instanceof ArrayBuffer) return new DataView(value);
+  if (ArrayBuffer.isView(value)) {
+    return new DataView(value.buffer, value.byteOffset, value.byteLength);
+  }
+  throw new Error('Expected a DataView, ArrayBuffer, or typed array.');
+}
+
+function nowMs() {
+  return typeof performance !== 'undefined' && typeof performance.now === 'function'
+    ? performance.now()
+    : Date.now();
+}
+
+function parseOrientationEuler(value) {
+  const view = asDataView(value);
+  if (view.byteLength < 16) {
+    throw new Error(`Orientation Euler payload must be at least 16 bytes; received ${view.byteLength}.`);
+  }
+
+  return {
+    timestampUs: view.getUint32(0, true),
+    euler: {
+      x: view.getFloat32(4, true),
+      y: view.getFloat32(8, true),
+      z: view.getFloat32(12, true),
+    },
+    receivedAtMs: nowMs(),
+  };
+}
+
+function parseBatteryStatus(value) {
+  const view = asDataView(value);
+  if (view.byteLength < 2) {
+    throw new Error(`Battery payload must be 2 bytes; received ${view.byteLength}.`);
+  }
+
+  const levelPercent = view.getUint8(0);
+  const chargingStatus = view.getUint8(1);
+
+  return {
+    levelPercent,
+    chargingStatus,
+    isCharging: chargingStatus === 1,
+    receivedAtMs: nowMs(),
+  };
+}
+
+async function writeCharacteristic(characteristic, bytes) {
+  const value = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  if (typeof characteristic.writeValueWithResponse === 'function') {
+    await characteristic.writeValueWithResponse(value);
+  } else {
+    await characteristic.writeValue(value);
+  }
+}
+
+class XsensDotDevice extends EventTarget {
+  constructor(segmentLabel) {
+    super();
+    this.segmentLabel = segmentLabel;
+    this.device = null;
+    this.server = null;
+    this.measurementService = null;
+    this.controlCharacteristic = null;
+    this.payloadCharacteristic = null;
+    this.batteryService = null;
+    this.batteryCharacteristic = null;
+    this.latestSample = null;
+    this.latestBattery = null;
+    this.connected = false;
+    this.streaming = false;
+    this._batteryPollTimer = null;
+    this._onNotification = this._onNotification.bind(this);
+    this._onBatteryNotification = this._onBatteryNotification.bind(this);
+    this._onDisconnected = this._onDisconnected.bind(this);
+  }
+
+  get name() {
+    return this.device?.name ?? 'Unnamed DOT';
+  }
+
+  async requestAndConnect() {
+    if (!browserSupportsWebBluetooth()) {
+      throw new Error('Web Bluetooth is not available in this browser. Use Chrome or Edge over HTTPS/localhost.');
+    }
+
+    const device = await navigator.bluetooth.requestDevice({
+      filters: [
+        { namePrefix: 'Movella' },
+        { namePrefix: 'Xsens' },
+      ],
+      optionalServices: [
+        UUIDS.measurementService,
+        UUIDS.configurationService,
+        UUIDS.batteryService,
+      ],
+    });
+
+    await this.connect(device);
+    return this;
+  }
+
+  async connect(device = this.device) {
+    if (!device) {
+      throw new Error('No Bluetooth device selected.');
+    }
+
+    this.device = device;
+    this.device.removeEventListener('gattserverdisconnected', this._onDisconnected);
+    this.device.addEventListener('gattserverdisconnected', this._onDisconnected);
+
+    this.server = await this.device.gatt.connect();
+    this.measurementService = await this.server.getPrimaryService(UUIDS.measurementService);
+    this.controlCharacteristic = await this.measurementService.getCharacteristic(UUIDS.measurementControl);
+    this.payloadCharacteristic = await this.measurementService.getCharacteristic(UUIDS.shortPayload);
+
+    this.connected = true;
+    this.dispatchEvent(new CustomEvent('status', { detail: this.statusDetail('connected') }));
+    await this._setupBatteryMonitoring();
+  }
+
+  async startStreaming() {
+    if (!this.connected || !this.payloadCharacteristic || !this.controlCharacteristic) {
+      throw new Error(`${this.segmentLabel} DOT is not connected.`);
+    }
+
+    this.payloadCharacteristic.removeEventListener('characteristicvaluechanged', this._onNotification);
+    this.payloadCharacteristic.addEventListener('characteristicvaluechanged', this._onNotification);
+
+    await this.payloadCharacteristic.startNotifications();
+
+    // Control characteristic: type=1 measurement, action=1 start, payload mode=4 Orientation Euler.
+    await writeCharacteristic(this.controlCharacteristic, [0x01, 0x01, PAYLOAD_MODE.ORIENTATION_EULER]);
+    this.streaming = true;
+    this.dispatchEvent(new CustomEvent('status', { detail: this.statusDetail('streaming') }));
+  }
+
+  async stopStreaming() {
+    if (!this.controlCharacteristic) return;
+
+    // Control characteristic: type=1 measurement, action=0 stop. Payload byte is ignored for stop.
+    await writeCharacteristic(this.controlCharacteristic, [0x01, 0x00, 0x00]);
+
+    if (this.payloadCharacteristic) {
+      try {
+        await this.payloadCharacteristic.stopNotifications();
+      } catch {
+        // Some platforms throw when notifications have already stopped. Safe to ignore.
+      }
+      this.payloadCharacteristic.removeEventListener('characteristicvaluechanged', this._onNotification);
+    }
+
+    this.streaming = false;
+    this.dispatchEvent(new CustomEvent('status', { detail: this.statusDetail('connected') }));
+  }
+
+  async refreshBattery() {
+    if (!this.connected || !this.batteryCharacteristic) {
+      throw new Error(`${this.segmentLabel} DOT battery characteristic is not available.`);
+    }
+
+    const value = await this.batteryCharacteristic.readValue();
+    const battery = parseBatteryStatus(value);
+    this.latestBattery = battery;
+    this.dispatchEvent(new CustomEvent('battery', {
+      detail: {
+        segment: this.segmentLabel,
+        battery,
+        available: true,
+        device: this,
+      },
+    }));
+    return battery;
+  }
+
+  async disconnect() {
+    await this.stopStreaming();
+    await this._stopBatteryMonitoring();
+    this.device?.gatt?.disconnect();
+    this.connected = false;
+    this.streaming = false;
+    this.latestBattery = null;
+    this.dispatchEvent(new CustomEvent('status', { detail: this.statusDetail('disconnected') }));
+    this.dispatchEvent(new CustomEvent('battery', {
+      detail: {
+        segment: this.segmentLabel,
+        battery: null,
+        available: false,
+        device: this,
+      },
+    }));
+  }
+
+  statusDetail(state) {
+    return {
+      segment: this.segmentLabel,
+      state,
+      name: this.name,
+      connected: this.connected,
+      streaming: this.streaming,
+      battery: this.latestBattery,
+    };
+  }
+
+  async _setupBatteryMonitoring() {
+    await this._stopBatteryMonitoring();
+
+    try {
+      this.batteryService = await this.server.getPrimaryService(UUIDS.batteryService);
+      this.batteryCharacteristic = await this.batteryService.getCharacteristic(UUIDS.batteryCharacteristic);
+
+      this.batteryCharacteristic.removeEventListener('characteristicvaluechanged', this._onBatteryNotification);
+      this.batteryCharacteristic.addEventListener('characteristicvaluechanged', this._onBatteryNotification);
+
+      await this.refreshBattery();
+
+      try {
+        await this.batteryCharacteristic.startNotifications();
+      } catch {
+        // Reading still works even if the browser/platform rejects battery notifications.
+      }
+
+      if (typeof window !== 'undefined' && typeof window.setInterval === 'function') {
+        this._batteryPollTimer = window.setInterval(() => {
+          this.refreshBattery().catch(() => {
+            // Ignore transient read failures; disconnect/status events handle permanent failures.
+          });
+        }, BATTERY_POLL_INTERVAL_MS);
+      }
+    } catch (error) {
+      this.latestBattery = null;
+      this.batteryService = null;
+      this.batteryCharacteristic = null;
+      this.dispatchEvent(new CustomEvent('battery', {
+        detail: {
+          segment: this.segmentLabel,
+          battery: null,
+          available: false,
+          error,
+          device: this,
+        },
+      }));
+    }
+  }
+
+  async _stopBatteryMonitoring() {
+    if (this._batteryPollTimer && typeof window !== 'undefined') {
+      window.clearInterval(this._batteryPollTimer);
+    }
+    this._batteryPollTimer = null;
+
+    if (this.batteryCharacteristic) {
+      try {
+        await this.batteryCharacteristic.stopNotifications();
+      } catch {
+        // Some platforms throw when notifications have already stopped. Safe to ignore.
+      }
+      this.batteryCharacteristic.removeEventListener('characteristicvaluechanged', this._onBatteryNotification);
+    }
+  }
+
+  _onNotification(event) {
+    try {
+      const sample = parseOrientationEuler(event.target.value);
+      this.latestSample = sample;
+      this.dispatchEvent(new CustomEvent('sample', {
+        detail: {
+          segment: this.segmentLabel,
+          sample,
+          device: this,
+        },
+      }));
+    } catch (error) {
+      this.dispatchEvent(new CustomEvent('error', { detail: error }));
+    }
+  }
+
+  _onBatteryNotification(event) {
+    try {
+      const battery = parseBatteryStatus(event.target.value);
+      this.latestBattery = battery;
+      this.dispatchEvent(new CustomEvent('battery', {
+        detail: {
+          segment: this.segmentLabel,
+          battery,
+          available: true,
+          device: this,
+        },
+      }));
+    } catch (error) {
+      this.dispatchEvent(new CustomEvent('error', { detail: error }));
+    }
+  }
+
+  _onDisconnected() {
+    this.connected = false;
+    this.streaming = false;
+    this.latestBattery = null;
+    this._stopBatteryMonitoring().catch(() => {});
+    this.dispatchEvent(new CustomEvent('status', { detail: this.statusDetail('disconnected') }));
+    this.dispatchEvent(new CustomEvent('battery', {
+      detail: {
+        segment: this.segmentLabel,
+        battery: null,
+        available: false,
+        device: this,
+      },
+    }));
+  }
+}
+// ===== kneeAngle.js =====
+function normalizeDeg(angleDeg) {
+  if (!Number.isFinite(angleDeg)) return NaN;
+  return ((((angleDeg + 180) % 360) + 360) % 360) - 180;
+}
+
+function circularDifferenceDeg(aDeg, bDeg) {
+  return normalizeDeg(aDeg - bDeg);
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+class KneeAngleEstimator {
+  constructor({ axis = 'y', inverted = false, smoothingPercent = 0 } = {}) {
+    this.axis = axis;
+    this.inverted = inverted;
+    this.zeroOffsetDeg = 0;
+    this.smoothingPercent = clamp(Number(smoothingPercent) || 0, 0, 95);
+    this._filteredKneeAngleDeg = null;
+    this.latest = {
+      thigh: null,
+      shank: null,
+    };
+  }
+
+  setAxis(axis) {
+    if (!['x', 'y', 'z'].includes(axis)) {
+      throw new Error(`Invalid axis '${axis}'. Expected x, y, or z.`);
+    }
+    this.axis = axis;
+    this.resetFilterToCurrent();
+  }
+
+  setInverted(inverted) {
+    this.inverted = Boolean(inverted);
+    this.resetFilterToCurrent();
+  }
+
+  setSmoothingPercent(percent) {
+    const next = clamp(Number(percent) || 0, 0, 95);
+    this.smoothingPercent = next;
+    this.resetFilterToCurrent();
+  }
+
+  update(segment, sample) {
+    if (!['thigh', 'shank'].includes(segment)) {
+      throw new Error(`Invalid segment '${segment}'. Expected thigh or shank.`);
+    }
+    this.latest[segment] = sample;
+    this._updateFilter();
+  }
+
+  get thighPitchDeg() {
+    return this.latest.thigh?.euler?.[this.axis] ?? null;
+  }
+
+  get shankPitchDeg() {
+    return this.latest.shank?.euler?.[this.axis] ?? null;
+  }
+
+  get ready() {
+    return Number.isFinite(this.thighPitchDeg) && Number.isFinite(this.shankPitchDeg);
+  }
+
+  get rawAngleDeg() {
+    if (!this.ready) return null;
+    return circularDifferenceDeg(this.thighPitchDeg, this.shankPitchDeg);
+  }
+
+  get unfilteredKneeAngleDeg() {
+    if (!this.ready) return null;
+    const zeroed = circularDifferenceDeg(this.rawAngleDeg, this.zeroOffsetDeg);
+    return this.inverted ? -zeroed : zeroed;
+  }
+
+  get filteredKneeAngleDeg() {
+    if (!this.ready) return null;
+    return Number.isFinite(this._filteredKneeAngleDeg)
+      ? this._filteredKneeAngleDeg
+      : this.unfilteredKneeAngleDeg;
+  }
+
+  get kneeAngleDeg() {
+    return this.filteredKneeAngleDeg;
+  }
+
+  calibrateZero() {
+    if (!this.ready) {
+      throw new Error('Both thigh and shank samples are required before zero calibration.');
+    }
+    this.zeroOffsetDeg = this.rawAngleDeg;
+    this.resetFilterToCurrent();
+    return this.zeroOffsetDeg;
+  }
+
+  resetZero() {
+    this.zeroOffsetDeg = 0;
+    this.resetFilterToCurrent();
+  }
+
+  resetFilterToCurrent() {
+    this._filteredKneeAngleDeg = Number.isFinite(this.unfilteredKneeAngleDeg)
+      ? this.unfilteredKneeAngleDeg
+      : null;
+  }
+
+  _updateFilter() {
+    const unfiltered = this.unfilteredKneeAngleDeg;
+    if (!Number.isFinite(unfiltered)) return;
+
+    if (!Number.isFinite(this._filteredKneeAngleDeg) || this.smoothingPercent <= 0) {
+      this._filteredKneeAngleDeg = unfiltered;
+      return;
+    }
+
+    const alpha = 1 - this.smoothingPercent / 100;
+    const delta = circularDifferenceDeg(unfiltered, this._filteredKneeAngleDeg);
+    this._filteredKneeAngleDeg = normalizeDeg(this._filteredKneeAngleDeg + alpha * delta);
+  }
+}
+// ===== chart.js =====
+class RollingLineChart {
+  constructor(canvas, { maxPoints = 600 } = {}) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.maxPoints = maxPoints;
+    this.points = [];
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  resize() {
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(300, rect.width || this.canvas.width);
+    const height = Math.max(180, rect.height || this.canvas.height);
+    this.canvas.width = Math.floor(width * dpr);
+    this.canvas.height = Math.floor(height * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.draw();
+  }
+
+  clear() {
+    this.points = [];
+    this.draw();
+  }
+
+  push(angleDeg) {
+    if (!Number.isFinite(angleDeg)) return;
+    this.points.push({ t: performance.now(), y: angleDeg });
+    if (this.points.length > this.maxPoints) {
+      this.points.splice(0, this.points.length - this.maxPoints);
+    }
+    this.draw();
+  }
+
+  draw() {
+    const ctx = this.ctx;
+    const width = this.canvas.clientWidth || 900;
+    const height = this.canvas.clientHeight || 260;
+    const pad = { left: 48, right: 16, top: 18, bottom: 34 };
+    const plotW = width - pad.left - pad.right;
+    const plotH = height - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = '#d6dde8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top);
+    ctx.lineTo(pad.left, pad.top + plotH);
+    ctx.lineTo(pad.left + plotW, pad.top + plotH);
+    ctx.stroke();
+
+    if (this.points.length < 2) {
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.fillText('Waiting for live data...', pad.left + 10, pad.top + 28);
+      return;
+    }
+
+    const ys = this.points.map((p) => p.y);
+    let minY = Math.min(...ys, -5);
+    let maxY = Math.max(...ys, 60);
+    if (Math.abs(maxY - minY) < 10) {
+      const mid = (maxY + minY) / 2;
+      minY = mid - 5;
+      maxY = mid + 5;
+    }
+    const yPad = (maxY - minY) * 0.12;
+    minY -= yPad;
+    maxY += yPad;
+
+    const minT = this.points[0].t;
+    const maxT = this.points[this.points.length - 1].t;
+    const timeSpan = Math.max(1, maxT - minT);
+
+    const x = (t) => pad.left + ((t - minT) / timeSpan) * plotW;
+    const y = (value) => pad.top + (1 - (value - minY) / (maxY - minY)) * plotH;
+
+    ctx.strokeStyle = '#eef2f7';
+    ctx.beginPath();
+    for (let i = 0; i <= 4; i += 1) {
+      const yy = pad.top + (plotH * i) / 4;
+      ctx.moveTo(pad.left, yy);
+      ctx.lineTo(pad.left + plotW, yy);
+    }
+    ctx.stroke();
+
+    ctx.strokeStyle = '#1f6feb';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    this.points.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(x(p.t), y(p.y));
+      else ctx.lineTo(x(p.t), y(p.y));
+    });
+    ctx.stroke();
+
+    ctx.fillStyle = '#374151';
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i <= 4; i += 1) {
+      const value = maxY - ((maxY - minY) * i) / 4;
+      ctx.fillText(`${value.toFixed(0)} deg`, pad.left - 8, pad.top + (plotH * i) / 4);
+    }
+
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('recent time', pad.left, height - 10);
+  }
+}
+
+function range(values) {
+  const finite = values.filter(Number.isFinite);
+  if (finite.length === 0) return { min: 0, max: 1 };
+  let min = Math.min(...finite);
+  let max = Math.max(...finite);
+  if (Math.abs(max - min) < 10) {
+    const mid = (min + max) / 2;
+    min = mid - 5;
+    max = mid + 5;
+  }
+  const pad = (max - min) * 0.12;
+  return { min: min - pad, max: max + pad };
+}
+
+class RepetitionAnalysisChart {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.result = null;
+    this.message = 'Analyze a CSV to show detected repetitions.';
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+  }
+
+  resize() {
+    const rect = this.canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(320, rect.width || this.canvas.width);
+    const height = Math.max(220, rect.height || this.canvas.height);
+    this.canvas.width = Math.floor(width * dpr);
+    this.canvas.height = Math.floor(height * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.draw();
+  }
+
+  hardClearCanvas() {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.restore();
+
+    const dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  clear(message = 'Analyze a CSV to show detected repetitions.') {
+    this.result = null;
+    this.message = message;
+    this.hardClearCanvas();
+    this.draw();
+  }
+
+  render(result) {
+    this.result = result;
+    this.message = '';
+    this.hardClearCanvas();
+    this.draw();
+  }
+
+  drawMarker(x, y, type) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = '#ffffff';
+
+    if (type === 'extension-start') {
+      ctx.fillStyle = '#1d4ed8';
+      ctx.beginPath();
+      ctx.moveTo(x, y + 7);
+      ctx.lineTo(x - 6, y - 5);
+      ctx.lineTo(x + 6, y - 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (type === 'extension-end') {
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.rect(x - 5, y - 5, 10, 10);
+      ctx.fill();
+      ctx.stroke();
+    } else if (type === 'flexion-start') {
+      ctx.fillStyle = '#15803d';
+      ctx.beginPath();
+      ctx.moveTo(x + 7, y);
+      ctx.lineTo(x - 5, y - 6);
+      ctx.lineTo(x - 5, y + 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    } else if (type === 'flexion-end') {
+      ctx.fillStyle = '#7c3aed';
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else if (type === 'flexion') {
+      ctx.fillStyle = '#7c3aed';
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    } else {
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.rect(x - 5, y - 5, 10, 10);
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  draw() {
+    const ctx = this.ctx;
+    this.hardClearCanvas();
+    const width = this.canvas.clientWidth || 900;
+    const height = this.canvas.clientHeight || 320;
+    const pad = { left: 54, right: 18, top: 20, bottom: 54 };
+    const plotW = width - pad.left - pad.right;
+    const plotH = height - pad.top - pad.bottom;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.strokeStyle = '#d6dde8';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, pad.top);
+    ctx.lineTo(pad.left, pad.top + plotH);
+    ctx.lineTo(pad.left + plotW, pad.top + plotH);
+    ctx.stroke();
+
+    if (!this.result || !Array.isArray(this.result.samples) || this.result.samples.length < 2) {
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '14px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(this.message || 'No analysis result to display.', pad.left + 10, pad.top + 28);
+      return;
+    }
+
+    const samples = this.result.samples;
+    const timeMin = samples[0].timeSec;
+    const timeMax = samples[samples.length - 1].timeSec;
+    const timeSpan = Math.max(0.001, timeMax - timeMin);
+    const yRange = range(samples.map((sample) => sample.angleDeg));
+
+    const x = (timeSec) => pad.left + ((timeSec - timeMin) / timeSpan) * plotW;
+    const y = (angleDeg) => pad.top + (1 - (angleDeg - yRange.min) / (yRange.max - yRange.min)) * plotH;
+
+    ctx.strokeStyle = '#eef2f7';
+    ctx.beginPath();
+    for (let i = 0; i <= 4; i += 1) {
+      const yy = pad.top + (plotH * i) / 4;
+      ctx.moveTo(pad.left, yy);
+      ctx.lineTo(pad.left + plotW, yy);
+    }
+    for (let i = 0; i <= 5; i += 1) {
+      const xx = pad.left + (plotW * i) / 5;
+      ctx.moveTo(xx, pad.top);
+      ctx.lineTo(xx, pad.top + plotH);
+    }
+    ctx.stroke();
+
+    for (const block of this.result.blocks || []) {
+      const startSample = samples[block.startIndex];
+      const endSample = samples[block.endIndex];
+      if (!startSample || !endSample) continue;
+      const blockX1 = x(startSample.timeSec);
+      const blockX2 = x(endSample.timeSec);
+      const widthValue = Math.max(0, blockX2 - blockX1);
+      if (block.state === 'extension') ctx.fillStyle = 'rgba(37, 99, 235, 0.10)';
+      else if (block.state === 'flexion') ctx.fillStyle = 'rgba(22, 163, 74, 0.10)';
+      else ctx.fillStyle = 'rgba(148, 163, 184, 0.12)';
+      ctx.fillRect(blockX1, pad.top, widthValue, plotH);
+    }
+
+    const drawLineRange = (startIndex, endIndex, color, widthValue = 3) => {
+      const start = Math.max(0, startIndex);
+      const end = Math.min(samples.length - 1, endIndex);
+      if (end <= start) return;
+      ctx.strokeStyle = color;
+      ctx.lineWidth = widthValue;
+      ctx.beginPath();
+      for (let i = start; i <= end; i += 1) {
+        const p = samples[i];
+        if (i === start) ctx.moveTo(x(p.timeSec), y(p.angleDeg));
+        else ctx.lineTo(x(p.timeSec), y(p.angleDeg));
+      }
+      ctx.stroke();
+    };
+
+    ctx.strokeStyle = '#94a3b8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    samples.forEach((p, i) => {
+      if (i === 0) ctx.moveTo(x(p.timeSec), y(p.angleDeg));
+      else ctx.lineTo(x(p.timeSec), y(p.angleDeg));
+    });
+    ctx.stroke();
+
+    for (const rep of this.result.reps || []) {
+      drawLineRange(rep.extensionStartIndex, rep.extensionEndIndex, '#2563eb', 3);
+      drawLineRange(rep.flexionStartIndex, rep.flexionEndIndex, '#16a34a', 3);
+
+      const labelSample = samples[rep.extensionPeakIndex];
+      if (labelSample) {
+        ctx.fillStyle = '#111827';
+        ctx.font = '12px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(`Rep ${rep.rep}`, x(labelSample.timeSec), y(labelSample.angleDeg) - 10);
+      }
+    }
+
+    for (const extreme of this.result.extrema || []) {
+      const sample = samples[extreme.index];
+      if (!sample) continue;
+      this.drawMarker(x(sample.timeSec), y(sample.angleDeg), extreme.type);
+    }
+
+    ctx.fillStyle = '#374151';
+    ctx.font = '12px system-ui, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    for (let i = 0; i <= 4; i += 1) {
+      const value = yRange.max - ((yRange.max - yRange.min) * i) / 4;
+      ctx.fillText(`${value.toFixed(0)} deg`, pad.left - 8, pad.top + (plotH * i) / 4);
+    }
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let i = 0; i <= 5; i += 1) {
+      const timeSec = timeMin + (timeSpan * i) / 5;
+      ctx.fillText(`${timeSec.toFixed(1)} s`, pad.left + (plotW * i) / 5, pad.top + plotH + 8);
+    }
+
+    const legendY = height - 18;
+    let legendX = pad.left;
+    const legendItems = [
+      { label: 'Extension movement', color: '#2563eb', shape: 'line' },
+      { label: 'Flexion movement', color: '#16a34a', shape: 'line' },
+      { label: 'Hold/rest', color: '#94a3b8', shape: 'line' },
+      { label: 'Ext. start', color: '#1d4ed8', shape: 'triangle' },
+      { label: 'Ext. end', color: '#f97316', shape: 'square' },
+      { label: 'Flex. start', color: '#15803d', shape: 'triangle-right' },
+      { label: 'Flex. end', color: '#7c3aed', shape: 'circle' },
+    ];
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.font = '12px system-ui, sans-serif';
+    for (const item of legendItems) {
+      ctx.fillStyle = item.color;
+      ctx.strokeStyle = item.color;
+      ctx.lineWidth = 3;
+      if (item.shape === 'line') {
+        ctx.beginPath();
+        ctx.moveTo(legendX, legendY);
+        ctx.lineTo(legendX + 18, legendY);
+        ctx.stroke();
+      } else if (item.shape === 'circle') {
+        ctx.beginPath();
+        ctx.arc(legendX + 9, legendY, 5, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (item.shape === 'triangle') {
+        ctx.beginPath();
+        ctx.moveTo(legendX + 9, legendY + 6);
+        ctx.lineTo(legendX + 3, legendY - 5);
+        ctx.lineTo(legendX + 15, legendY - 5);
+        ctx.closePath();
+        ctx.fill();
+      } else if (item.shape === 'triangle-right') {
+        ctx.beginPath();
+        ctx.moveTo(legendX + 15, legendY);
+        ctx.lineTo(legendX + 4, legendY - 6);
+        ctx.lineTo(legendX + 4, legendY + 6);
+        ctx.closePath();
+        ctx.fill();
+      } else {
+        ctx.fillRect(legendX + 4, legendY - 5, 10, 10);
+      }
+      ctx.fillStyle = '#475569';
+      ctx.fillText(item.label, legendX + 24, legendY);
+      legendX += ctx.measureText(item.label).width + 52;
+    }
+  }
+}
+// ===== analysis.js =====
+function numberOrDefault(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function round(value, digits = 3) {
+  if (!Number.isFinite(value)) return '';
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+}
+
+function parseNumber(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : NaN;
+  if (typeof value !== 'string') return NaN;
+  const parsed = Number(value.trim());
+  return Number.isFinite(parsed) ? parsed : NaN;
+}
+
+function pushCsvField(row, field) {
+  row.push(field);
+}
+
+function parseCsv(text) {
+  const source = String(text ?? '');
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < source.length; i += 1) {
+    const ch = source[i];
+
+    if (inQuotes) {
+      if (ch === '"') {
+        if (source[i + 1] === '"') {
+          field += '"';
+          i += 1;
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        field += ch;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      pushCsvField(row, field);
+      field = '';
+    } else if (ch === '\n') {
+      pushCsvField(row, field);
+      rows.push(row);
+      row = [];
+      field = '';
+    } else if (ch === '\r') {
+      pushCsvField(row, field);
+      rows.push(row);
+      row = [];
+      field = '';
+      if (source[i + 1] === '\n') i += 1;
+    } else {
+      field += ch;
+    }
+  }
+
+  if (field.length > 0 || row.length > 0) {
+    pushCsvField(row, field);
+    rows.push(row);
+  }
+
+  const nonEmptyRows = rows.filter((r) => r.some((cell) => String(cell).trim() !== ''));
+  if (nonEmptyRows.length === 0) return { headers: [], rows: [] };
+
+  const headers = nonEmptyRows[0].map((h, i) => {
+    const cleaned = String(h).replace(/^\uFEFF/, '').trim();
+    return cleaned || `column_${i + 1}`;
+  });
+
+  const objects = nonEmptyRows.slice(1).map((cells) => {
+    const obj = {};
+    headers.forEach((header, i) => {
+      obj[header] = cells[i] ?? '';
+    });
+    return obj;
+  });
+
+  return { headers, rows: objects };
+}
+
+function pickColumn(headers, requested, preferred) {
+  if (requested && headers.includes(requested)) return requested;
+  return preferred.find((name) => headers.includes(name)) ?? null;
+}
+
+function numericTimeScale(column) {
+  const lower = column.toLowerCase();
+  if (lower.includes('us') || lower.includes('micro')) return 1 / 1_000_000;
+  if (lower.includes('ms') || lower.includes('milli')) return 1 / 1_000;
+  return 1;
+}
+
+function extractSamples(rows, headers, options = {}) {
+  const angleColumn = pickColumn(headers, options.angleColumn, [
+    'knee_angle_filtered_deg',
+    'knee_angle_deg',
+    'knee_angle_unfiltered_deg',
+    'angle_deg',
+    'knee_angle',
+  ]);
+
+  if (!angleColumn) {
+    throw new Error('Could not find a knee angle column. Expected knee_angle_filtered_deg or knee_angle_deg.');
+  }
+
+  const timeColumn = pickColumn(headers, options.timeColumn, [
+    'iso_time',
+    'time_s',
+    'time_sec',
+    'time_seconds',
+    'elapsed_s',
+    'timestamp_s',
+    'timestamp_ms',
+    'timestamp_us',
+  ]);
+
+  const sampleRateHz = Math.max(1, numberOrDefault(options.sampleRateHz, 60));
+  const raw = [];
+
+  rows.forEach((row, rowIndex) => {
+    const angleDeg = parseNumber(row[angleColumn]);
+    if (!Number.isFinite(angleDeg)) return;
+
+    let timeValue = rowIndex / sampleRateHz;
+    let rawTime = null;
+
+    if (timeColumn) {
+      if (timeColumn === 'iso_time') {
+        const parsedMs = Date.parse(row[timeColumn]);
+        if (Number.isFinite(parsedMs)) rawTime = parsedMs / 1000;
+      } else {
+        const parsedTime = parseNumber(row[timeColumn]);
+        if (Number.isFinite(parsedTime)) rawTime = parsedTime * numericTimeScale(timeColumn);
+      }
+    }
+
+    if (Number.isFinite(rawTime)) timeValue = rawTime;
+
+    raw.push({
+      rowIndex,
+      rawTime: timeValue,
+      angleDeg,
+    });
+  });
+
+  if (raw.length < 3) {
+    throw new Error('Not enough valid knee angle samples to analyze.');
+  }
+
+  raw.sort((a, b) => a.rawTime - b.rawTime || a.rowIndex - b.rowIndex);
+  const baseTime = raw[0].rawTime;
+  const samples = raw.map((sample, i) => ({
+    index: i,
+    rowIndex: sample.rowIndex,
+    timeSec: Math.max(0, sample.rawTime - baseTime),
+    angleDeg: sample.angleDeg,
+  }));
+
+  return { samples, angleColumn, timeColumn: timeColumn || 'row_index_assuming_60_hz' };
+}
+
+function centeredMovingAverage(values, requestedWindow) {
+  const windowSize = Math.max(1, Math.floor(numberOrDefault(requestedWindow, 1)));
+  if (windowSize <= 1) return values.slice();
+
+  const half = Math.floor(windowSize / 2);
+  const smoothed = [];
+  for (let i = 0; i < values.length; i += 1) {
+    let sum = 0;
+    let count = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(values.length - 1, i + half); j += 1) {
+      if (Number.isFinite(values[j])) {
+        sum += values[j];
+        count += 1;
+      }
+    }
+    smoothed.push(count > 0 ? sum / count : values[i]);
+  }
+  return smoothed;
+}
+
+
+function medianSampleIntervalSec(samples) {
+  const intervals = [];
+  for (let i = 1; i < samples.length; i += 1) {
+    const dt = samples[i].timeSec - samples[i - 1].timeSec;
+    if (Number.isFinite(dt) && dt > 0) intervals.push(dt);
+  }
+  if (intervals.length === 0) return 1 / 60;
+  intervals.sort((a, b) => a - b);
+  return intervals[Math.floor(intervals.length / 2)] || 1 / 60;
+}
+
+function addAngularVelocity(samples, directionSign, velocitySmoothingWindow = 1) {
+  const velocities = samples.map((sample, i) => {
+    let previousIndex = i - 1;
+    while (previousIndex >= 0 && samples[previousIndex].timeSec === sample.timeSec) previousIndex -= 1;
+    let nextIndex = i + 1;
+    while (nextIndex < samples.length && samples[nextIndex].timeSec === sample.timeSec) nextIndex += 1;
+
+    let velocityDegS = 0;
+    if (previousIndex >= 0 && nextIndex < samples.length) {
+      const dt = samples[nextIndex].timeSec - samples[previousIndex].timeSec;
+      velocityDegS = dt > 0 ? (samples[nextIndex].angleDeg - samples[previousIndex].angleDeg) / dt : 0;
+    } else if (previousIndex >= 0) {
+      const dt = sample.timeSec - samples[previousIndex].timeSec;
+      velocityDegS = dt > 0 ? (sample.angleDeg - samples[previousIndex].angleDeg) / dt : 0;
+    } else if (nextIndex < samples.length) {
+      const dt = samples[nextIndex].timeSec - sample.timeSec;
+      velocityDegS = dt > 0 ? (samples[nextIndex].angleDeg - sample.angleDeg) / dt : 0;
+    }
+    return velocityDegS;
+  });
+
+  const smoothedVelocities = centeredMovingAverage(velocities, velocitySmoothingWindow);
+  return samples.map((sample, i) => ({
+    ...sample,
+    velocityDegS: velocities[i] || 0,
+    smoothedVelocityDegS: smoothedVelocities[i] || 0,
+    detectionVelocityDegS: directionSign * (smoothedVelocities[i] || 0),
+  }));
+}
+
+function classifyVelocityStates(samples, thresholdDegS) {
+  const threshold = Math.max(0.1, numberOrDefault(thresholdDegS, 10));
+  return samples.map((sample) => {
+    if (sample.detectionVelocityDegS <= -threshold) return 'extension';
+    if (sample.detectionVelocityDegS >= threshold) return 'flexion';
+    return 'hold';
+  });
+}
+
+function makeBlocks(states, samples) {
+  if (!states.length) return [];
+  const blocks = [];
+  let startIndex = 0;
+  let state = states[0];
+
+  const pushBlock = (endIndex) => {
+    const start = samples[startIndex];
+    const end = samples[endIndex];
+    if (!start || !end) return;
+    blocks.push({
+      state,
+      startIndex,
+      endIndex,
+      startTimeSec: start.timeSec,
+      endTimeSec: end.timeSec,
+      durationSec: Math.max(0, end.timeSec - start.timeSec),
+      signedChangeDeg: end.angleDeg - start.angleDeg,
+      detectionChangeDeg: end.detectionDeg - start.detectionDeg,
+      angleDistanceDeg: Math.abs(end.angleDeg - start.angleDeg),
+    });
+  };
+
+  for (let i = 1; i < states.length; i += 1) {
+    if (states[i] !== state) {
+      pushBlock(i - 1);
+      startIndex = i;
+      state = states[i];
+    }
+  }
+  pushBlock(states.length - 1);
+  return blocks;
+}
+
+function statesFromBlocks(blocks, length) {
+  const states = new Array(length).fill('hold');
+  for (const block of blocks) {
+    for (let i = block.startIndex; i <= block.endIndex; i += 1) states[i] = block.state;
+  }
+  return states;
+}
+
+function cleanVelocityStates(rawStates, samples, options = {}) {
+  const minMoveDurationSec = Math.max(0.05, numberOrDefault(options.minMovementDurationSec, 0.25));
+  const minMoveAngleDeg = Math.max(0.5, numberOrDefault(options.minMovementAngleDeg, 3));
+  const maxHoldMergeSec = Math.max(0.02, numberOrDefault(options.maxHoldMergeSec, minMoveDurationSec));
+  let states = rawStates.slice();
+
+  let changed = true;
+  while (changed) {
+    changed = false;
+    const blocks = makeBlocks(states, samples);
+    for (const block of blocks) {
+      if (
+        block.state !== 'hold'
+        && (block.durationSec < minMoveDurationSec || block.angleDistanceDeg < minMoveAngleDeg)
+      ) {
+        for (let i = block.startIndex; i <= block.endIndex; i += 1) states[i] = 'hold';
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  changed = true;
+  while (changed) {
+    changed = false;
+    const blocks = makeBlocks(states, samples);
+    for (let i = 1; i < blocks.length - 1; i += 1) {
+      const previous = blocks[i - 1];
+      const current = blocks[i];
+      const next = blocks[i + 1];
+      if (
+        current.state === 'hold'
+        && current.durationSec <= maxHoldMergeSec
+        && previous.state === next.state
+        && previous.state !== 'hold'
+      ) {
+        for (let j = current.startIndex; j <= current.endIndex; j += 1) states[j] = previous.state;
+        changed = true;
+        break;
+      }
+    }
+  }
+
+  return states;
+}
+
+function meanAbsVelocity(samples, startIndex, endIndex) {
+  const values = [];
+  for (let i = startIndex; i <= endIndex; i += 1) {
+    const v = Math.abs(samples[i]?.smoothedVelocityDegS ?? samples[i]?.velocityDegS ?? NaN);
+    if (Number.isFinite(v)) values.push(v);
+  }
+  return mean(values);
+}
+
+function movementDistance(samples, startIndex, endIndex) {
+  let distance = 0;
+  for (let i = startIndex + 1; i <= endIndex; i += 1) {
+    const delta = samples[i].angleDeg - samples[i - 1].angleDeg;
+    if (Number.isFinite(delta)) distance += Math.abs(delta);
+  }
+  return distance;
+}
+
+function getExtremaInRange(samples, startIndex, endIndex, directionSign) {
+  let peakFlexion = null;
+  let peakExtension = null;
+  for (let i = Math.max(0, startIndex); i <= Math.min(samples.length - 1, endIndex); i += 1) {
+    const sample = samples[i];
+    if (!sample) continue;
+    const detectionAngle = directionSign * sample.angleDeg;
+    if (!peakFlexion || detectionAngle > directionSign * peakFlexion.angleDeg) peakFlexion = sample;
+    if (!peakExtension || detectionAngle < directionSign * peakExtension.angleDeg) peakExtension = sample;
+  }
+  return { peakFlexion, peakExtension };
+}
+
+function findRepsFromVelocityBlocks(samples, blocks, options = {}) {
+  const minRomDeg = Math.max(0, numberOrDefault(options.minRomDeg, 10));
+  const minRepDurationSec = Math.max(0, numberOrDefault(options.minRepDurationSec, 0.4));
+  const directionSign = options.flexionDirection === 'lower' ? -1 : 1;
+  const movementBlocks = blocks.filter((block) => block.state !== 'hold');
+  const reps = [];
+  let i = 0;
+
+  while (i < movementBlocks.length - 1) {
+    const extensionBlock = movementBlocks[i];
+    if (extensionBlock.state !== 'extension') {
+      i += 1;
+      continue;
+    }
+
+    let flexionBlockIndex = -1;
+    for (let j = i + 1; j < movementBlocks.length; j += 1) {
+      if (movementBlocks[j].state === 'flexion') {
+        flexionBlockIndex = j;
+        break;
+      }
+      if (movementBlocks[j].state === 'extension') break;
+    }
+
+    if (flexionBlockIndex < 0) {
+      i += 1;
+      continue;
+    }
+
+    const flexionBlock = movementBlocks[flexionBlockIndex];
+    const extensionStartSample = samples[extensionBlock.startIndex];
+    const extensionEndSample = samples[extensionBlock.endIndex];
+    const flexionStartSample = samples[flexionBlock.startIndex];
+    const flexionEndSample = samples[flexionBlock.endIndex];
+    const repStartIndex = extensionBlock.startIndex;
+    const repEndIndex = flexionBlock.endIndex;
+    const repDurationSec = flexionEndSample.timeSec - extensionStartSample.timeSec;
+
+    if (repDurationSec < minRepDurationSec) {
+      i = flexionBlockIndex + 1;
+      continue;
+    }
+
+    const extensionRomDeg = Math.abs(extensionStartSample.angleDeg - extensionEndSample.angleDeg);
+    const flexionRomDeg = Math.abs(flexionEndSample.angleDeg - flexionStartSample.angleDeg);
+    const { peakFlexion, peakExtension } = getExtremaInRange(samples, repStartIndex, repEndIndex, directionSign);
+    const rangeOfMotionDeg = peakFlexion && peakExtension ? Math.abs(peakFlexion.angleDeg - peakExtension.angleDeg) : NaN;
+
+    if (
+      !Number.isFinite(rangeOfMotionDeg)
+      || rangeOfMotionDeg < minRomDeg
+      || extensionRomDeg < Math.max(1, minRomDeg * 0.35)
+      || flexionRomDeg < Math.max(1, minRomDeg * 0.35)
+    ) {
+      i = flexionBlockIndex + 1;
+      continue;
+    }
+
+    const extensionDistanceDeg = movementDistance(samples, extensionBlock.startIndex, extensionBlock.endIndex);
+    const flexionDistanceDeg = movementDistance(samples, flexionBlock.startIndex, flexionBlock.endIndex);
+    const movementDurationSec = extensionBlock.durationSec + flexionBlock.durationSec;
+    const movementAngleDistanceDeg = extensionDistanceDeg + flexionDistanceDeg;
+
+    reps.push({
+      rep: reps.length + 1,
+      startIndex: repStartIndex,
+      endIndex: repEndIndex,
+      extensionStartIndex: extensionBlock.startIndex,
+      extensionEndIndex: extensionBlock.endIndex,
+      extensionPeakIndex: extensionBlock.endIndex,
+      flexionStartIndex: flexionBlock.startIndex,
+      flexionEndIndex: flexionBlock.endIndex,
+      extensionMovementDetected: true,
+      flexionMovementDetected: true,
+      startTimeSec: extensionStartSample.timeSec,
+      endTimeSec: flexionEndSample.timeSec,
+      durationSec: repDurationSec,
+      extensionStartTimeSec: extensionStartSample.timeSec,
+      extensionEndTimeSec: extensionEndSample.timeSec,
+      flexionStartTimeSec: flexionStartSample.timeSec,
+      flexionEndTimeSec: flexionEndSample.timeSec,
+      extensionStartDeg: extensionStartSample.angleDeg,
+      extensionEndDeg: extensionEndSample.angleDeg,
+      flexionStartDeg: flexionStartSample.angleDeg,
+      flexionEndDeg: flexionEndSample.angleDeg,
+      extensionRomDeg,
+      flexionRomDeg,
+      peakFlexionIndex: peakFlexion?.index ?? extensionBlock.startIndex,
+      peakExtensionIndex: peakExtension?.index ?? extensionBlock.endIndex,
+      peakFlexionDeg: peakFlexion?.angleDeg ?? extensionStartSample.angleDeg,
+      peakFlexionTimeSec: peakFlexion?.timeSec ?? extensionStartSample.timeSec,
+      peakExtensionDeg: peakExtension?.angleDeg ?? extensionEndSample.angleDeg,
+      peakExtensionTimeSec: peakExtension?.timeSec ?? extensionEndSample.timeSec,
+      rangeOfMotionDeg,
+      extensionDurationSec: extensionBlock.durationSec,
+      flexionDurationSec: flexionBlock.durationSec,
+      extensionAngleDistanceDeg: extensionDistanceDeg,
+      flexionAngleDistanceDeg: flexionDistanceDeg,
+      movementDurationSec,
+      movementAngleDistanceDeg,
+      meanExtensionSpeedDegS: meanAbsVelocity(samples, extensionBlock.startIndex, extensionBlock.endIndex),
+      meanFlexionSpeedDegS: meanAbsVelocity(samples, flexionBlock.startIndex, flexionBlock.endIndex),
+      meanMovementSpeedDegS: movementDurationSec > 0 ? movementAngleDistanceDeg / movementDurationSec : NaN,
+    });
+
+    i = flexionBlockIndex + 1;
+  }
+
+  return reps;
+}
+
+function endpointsFromReps(reps, samples) {
+  const points = [];
+  const add = (type, index) => {
+    const sample = samples[index];
+    if (!sample) return;
+    points.push({ type, index, y: sample.angleDeg, timeSec: sample.timeSec });
+  };
+
+  for (const rep of reps) {
+    add('extension-start', rep.extensionStartIndex);
+    add('extension-end', rep.extensionEndIndex);
+    add('flexion-start', rep.flexionStartIndex);
+    add('flexion-end', rep.flexionEndIndex);
+  }
+  return points;
+}
+
+function mean(values) {
+  const finite = values.filter(Number.isFinite);
+  if (finite.length === 0) return NaN;
+  return finite.reduce((sum, value) => sum + value, 0) / finite.length;
+}
+
+function extreme(values, fn) {
+  const finite = values.filter(Number.isFinite);
+  if (finite.length === 0) return NaN;
+  return fn(...finite);
+}
+
+function buildSummary(reps, samples, directionSign) {
+  const angleValues = samples.map((sample) => sample.angleDeg);
+  const overallPeakFlexion = directionSign === 1
+    ? extreme(angleValues, Math.max)
+    : extreme(angleValues, Math.min);
+  const overallPeakExtension = directionSign === 1
+    ? extreme(angleValues, Math.min)
+    : extreme(angleValues, Math.max);
+
+  return {
+    repetitionCount: reps.length,
+    sampleCount: samples.length,
+    durationSec: samples.length > 1 ? samples[samples.length - 1].timeSec - samples[0].timeSec : 0,
+    overallPeakFlexionDeg: overallPeakFlexion,
+    overallPeakExtensionDeg: overallPeakExtension,
+    meanRangeOfMotionDeg: mean(reps.map((rep) => rep.rangeOfMotionDeg)),
+    meanExtensionSpeedDegS: mean(reps.map((rep) => rep.meanExtensionSpeedDegS)),
+    meanFlexionSpeedDegS: mean(reps.map((rep) => rep.meanFlexionSpeedDegS)),
+    meanMovementSpeedDegS: mean(reps.map((rep) => rep.meanMovementSpeedDegS)),
+  };
+}
+
+function analyzeKneeAngleRows(rows, headers, options = {}) {
+  const { samples: extractedSamples, angleColumn, timeColumn } = extractSamples(rows, headers, options);
+  const directionSign = options.flexionDirection === 'lower' ? -1 : 1;
+  const smoothingWindow = clamp(Math.floor(numberOrDefault(options.smoothingWindow, 1)), 1, 101);
+  const smoothedAngles = centeredMovingAverage(extractedSamples.map((sample) => sample.angleDeg), smoothingWindow);
+  const samplesWithoutVelocity = extractedSamples.map((sample, i) => ({
+    ...sample,
+    angleDeg: smoothedAngles[i],
+    originalAngleDeg: sample.angleDeg,
+    detectionDeg: directionSign * smoothedAngles[i],
+  }));
+  const velocitySmoothingWindow = Math.max(1, Math.floor(numberOrDefault(options.velocitySmoothingWindow, 11)));
+  const samples = addAngularVelocity(samplesWithoutVelocity, directionSign, velocitySmoothingWindow);
+  const rawStates = classifyVelocityStates(samples, options.movementThresholdDegS);
+  const states = cleanVelocityStates(rawStates, samples, options);
+  const blocks = makeBlocks(states, samples);
+  const reps = findRepsFromVelocityBlocks(samples, blocks, options);
+  const extrema = endpointsFromReps(reps, samples);
+
+  return {
+    angleColumn,
+    timeColumn,
+    directionSign,
+    smoothingWindow,
+    velocitySmoothingWindow,
+    samples,
+    states,
+    blocks,
+    extrema,
+    reps,
+    summary: buildSummary(reps, samples, directionSign),
+  };
+}
+
+function analyzeKneeAngleCsv(text, options = {}) {
+  const { headers, rows } = parseCsv(text);
+  if (headers.length === 0) throw new Error('The selected CSV appears to be empty.');
+  return analyzeKneeAngleRows(rows, headers, options);
+}
+
+function repetitionMetricsToCsv(reps) {
+  const headers = [
+    'rep',
+    'extension_start_time_s',
+    'extension_end_time_s',
+    'extension_start_angle_deg',
+    'extension_end_angle_deg',
+    'extension_rom_deg',
+    'flexion_start_time_s',
+    'flexion_end_time_s',
+    'flexion_start_angle_deg',
+    'flexion_end_angle_deg',
+    'flexion_rom_deg',
+    'rep_start_time_s',
+    'rep_end_time_s',
+    'rep_duration_s',
+    'rep_rom_deg',
+    'peak_flexion_deg',
+    'peak_extension_deg',
+    'mean_extension_angular_speed_deg_s',
+    'mean_flexion_angular_speed_deg_s',
+    'mean_movement_angular_speed_deg_s',
+    'extension_start_index',
+    'extension_end_index',
+    'flexion_start_index',
+    'flexion_end_index',
+  ];
+
+  const rows = reps.map((rep) => ({
+    rep: rep.rep,
+    extension_start_time_s: round(rep.extensionStartTimeSec),
+    extension_end_time_s: round(rep.extensionEndTimeSec),
+    extension_start_angle_deg: round(rep.extensionStartDeg),
+    extension_end_angle_deg: round(rep.extensionEndDeg),
+    extension_rom_deg: round(rep.extensionRomDeg),
+    flexion_start_time_s: round(rep.flexionStartTimeSec),
+    flexion_end_time_s: round(rep.flexionEndTimeSec),
+    flexion_start_angle_deg: round(rep.flexionStartDeg),
+    flexion_end_angle_deg: round(rep.flexionEndDeg),
+    flexion_rom_deg: round(rep.flexionRomDeg),
+    rep_start_time_s: round(rep.startTimeSec),
+    rep_end_time_s: round(rep.endTimeSec),
+    rep_duration_s: round(rep.durationSec),
+    rep_rom_deg: round(rep.rangeOfMotionDeg),
+    peak_flexion_deg: round(rep.peakFlexionDeg),
+    peak_extension_deg: round(rep.peakExtensionDeg),
+    mean_extension_angular_speed_deg_s: round(rep.meanExtensionSpeedDegS),
+    mean_flexion_angular_speed_deg_s: round(rep.meanFlexionSpeedDegS),
+    mean_movement_angular_speed_deg_s: round(rep.meanMovementSpeedDegS),
+    extension_start_index: rep.extensionStartIndex,
+    extension_end_index: rep.extensionEndIndex,
+    flexion_start_index: rep.flexionStartIndex,
+    flexion_end_index: rep.flexionEndIndex,
+  }));
+
+  const lines = [headers.join(',')];
+  for (const row of rows) {
+    lines.push(headers.map((header) => JSON.stringify(row[header] ?? '')).join(','));
+  }
+  return lines.join('\n');
+}
+// ===== main.js =====
+
+const $ = (id) => document.getElementById(id);
+
+const ui = {
+  browserSupport: $('browserSupport'),
+  thighPitch: $('thighPitch'),
+  shankPitch: $('shankPitch'),
+  rawAngle: $('rawAngle'),
+  unfilteredAngle: $('unfilteredAngle'),
+  zeroOffset: $('zeroOffset'),
+  thighBatteryMetric: $('thighBatteryMetric'),
+  shankBatteryMetric: $('shankBatteryMetric'),
+  axisSelect: $('axisSelect'),
+  smoothingRange: $('smoothingRange'),
+  smoothingValue: $('smoothingValue'),
+  invertSign: $('invertSign'),
+  autoStart: $('autoStart'),
+  calibrateBtn: $('calibrateBtn'),
+  resetZeroBtn: $('resetZeroBtn'),
+  resetFilterBtn: $('resetFilterBtn'),
+  startAllBtn: $('startAllBtn'),
+  stopAllBtn: $('stopAllBtn'),
+  sessionNameInput: $('sessionNameInput'),
+  fileNameInput: $('fileNameInput'),
+  chooseFolderBtn: $('chooseFolderBtn'),
+  folderStatus: $('folderStatus'),
+  logBtn: $('logBtn'),
+  downloadBtn: $('downloadBtn'),
+  mockBtn: $('mockBtn'),
+  clearBtn: $('clearBtn'),
+  logStatus: $('logStatus'),
+  analysisFileInput: $('analysisFileInput'),
+  flexionDirectionSelect: $('flexionDirectionSelect'),
+  minRomInput: $('minRomInput'),
+  minRepDurationInput: $('minRepDurationInput'),
+  analysisSmoothingInput: $('analysisSmoothingInput'),
+  movementThresholdInput: $('movementThresholdInput'),
+  analyzeFileBtn: $('analyzeFileBtn'),
+  analyzeCurrentLogBtn: $('analyzeCurrentLogBtn'),
+  exportAnalysisBtn: $('exportAnalysisBtn'),
+  analysisStatus: $('analysisStatus'),
+  analysisSummary: $('analysisSummary'),
+  analysisTable: $('analysisTable'),
+  analysisChart: $('analysisChart'),
+  chart: $('angleChart'),
+  thigh: {
+    status: $('thighStatus'),
+    name: $('thighName'),
+    timestamp: $('thighTs'),
+    euler: $('thighEuler'),
+    battery: $('thighBattery'),
+    connect: $('connectThighBtn'),
+    start: $('startThighBtn'),
+    stop: $('stopThighBtn'),
+  },
+  shank: {
+    status: $('shankStatus'),
+    name: $('shankName'),
+    timestamp: $('shankTs'),
+    euler: $('shankEuler'),
+    battery: $('shankBattery'),
+    connect: $('connectShankBtn'),
+    start: $('startShankBtn'),
+    stop: $('stopShankBtn'),
+  },
+};
+
+const DEFAULT_SMOOTHING_PERCENT = 70;
+const estimator = new KneeAngleEstimator({ axis: 'y', smoothingPercent: DEFAULT_SMOOTHING_PERCENT });
+const chart = new RollingLineChart(ui.chart);
+const analysisChart = new RepetitionAnalysisChart(ui.analysisChart);
+const sensors = {
+  thigh: new XsensDotDevice('thigh'),
+  shank: new XsensDotDevice('shank'),
+};
+
+let isLogging = false;
+let logRows = [];
+let mockTimer = null;
+let directoryHandle = null;
+let latestAnalysisResult = null;
+let latestAnalysisSourceName = '';
+let mockBatteries = {
+  thigh: null,
+  shank: null,
+};
+
+function fmt(value, digits = 1) {
+  return Number.isFinite(value) ? value.toFixed(digits) : '--.-';
+}
+
+function pad2(value) {
+  return String(value).padStart(2, '0');
+}
+
+function localTimestampForFileName(date = new Date()) {
+  return [
+    date.getFullYear(),
+    pad2(date.getMonth() + 1),
+    pad2(date.getDate()),
+  ].join('') + '-' + [
+    pad2(date.getHours()),
+    pad2(date.getMinutes()),
+    pad2(date.getSeconds()),
+  ].join('');
+}
+
+function defaultCsvName() {
+  return `xsens-dot-knee-angle-${localTimestampForFileName()}.csv`;
+}
+
+function getCsvFileName() {
+  const raw = ui.fileNameInput.value.trim() || defaultCsvName();
+  const sanitized = raw
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/^\.+/, '')
+    .slice(0, 180) || defaultCsvName();
+  return sanitized.toLowerCase().endsWith('.csv') ? sanitized : `${sanitized}.csv`;
+}
+
+function setStatus(segment, text, state = 'disconnected') {
+  const el = ui[segment].status;
+  el.textContent = text;
+  el.dataset.state = state;
+}
+
+function showError(error) {
+  console.error(error);
+  ui.browserSupport.textContent = error?.message ?? String(error);
+  ui.browserSupport.dataset.state = 'error';
+}
+
+function updateBrowserSupport() {
+  const supported = browserSupportsWebBluetooth();
+  ui.browserSupport.textContent = supported
+    ? 'Web Bluetooth available. Use Chrome/Edge and keep this page on HTTPS or localhost.'
+    : 'Web Bluetooth not detected. Use desktop Chrome or Edge over HTTPS/localhost.';
+  ui.browserSupport.dataset.state = supported ? 'ok' : 'error';
+}
+
+function updateSmoothingLabel() {
+  ui.smoothingValue.textContent = `${Math.round(estimator.smoothingPercent)}%`;
+}
+
+function updateFolderStatus() {
+  if (directoryHandle) {
+    ui.folderStatus.textContent = `Folder selected: ${directoryHandle.name}. Save CSV will write ${getCsvFileName()} there.`;
+  } else if ('showDirectoryPicker' in window) {
+    ui.folderStatus.textContent = 'No folder selected. Save CSV will use the browser download flow.';
+  } else {
+    ui.folderStatus.textContent = 'Folder picking is not supported in this browser. Save CSV will use the browser download flow.';
+  }
+}
+
+function batteryLabel(battery, { compact = false } = {}) {
+  if (!battery || !Number.isFinite(battery.levelPercent)) return '--';
+  const level = `${battery.levelPercent}%`;
+  if (battery.isCharging) return compact ? `${level} charging` : `${level} (charging)`;
+  return level;
+}
+
+function batteryState(battery) {
+  if (!battery || !Number.isFinite(battery.levelPercent)) return 'unknown';
+  if (battery.isCharging) return 'charging';
+  if (battery.levelPercent <= 15) return 'low';
+  if (battery.levelPercent <= 30) return 'warn';
+  return 'ok';
+}
+
+function chargingLabel(battery) {
+  if (!battery || !Number.isFinite(battery.chargingStatus)) return '';
+  return battery.isCharging ? 'charging' : 'not_charging';
+}
+
+function getBatteryForSegment(segment) {
+  return sensors[segment].latestBattery ?? mockBatteries[segment] ?? null;
+}
+
+function updateBatteryPanel(segment, detail = null) {
+  const hasBatteryProperty = detail
+    && typeof detail === 'object'
+    && Object.prototype.hasOwnProperty.call(detail, 'battery');
+  const battery = hasBatteryProperty ? detail.battery : detail;
+  const explicitlyUnavailable = detail && typeof detail === 'object' && detail.available === false;
+  const sensor = sensors[segment];
+  const unavailableText = sensor.connected ? 'Unavailable' : '--';
+  const text = battery
+    ? batteryLabel(battery)
+    : explicitlyUnavailable
+      ? unavailableText
+      : '--';
+  const compactText = battery
+    ? batteryLabel(battery, { compact: true })
+    : explicitlyUnavailable
+      ? unavailableText
+      : '--';
+  const state = battery ? batteryState(battery) : 'unknown';
+
+  ui[segment].battery.textContent = text;
+  ui[segment].battery.dataset.state = state;
+
+  const metric = segment === 'thigh' ? ui.thighBatteryMetric : ui.shankBatteryMetric;
+  metric.textContent = compactText;
+  metric.dataset.state = state;
+}
+
+function updateSensorPanel(segment, sample) {
+  const panel = ui[segment];
+  const e = sample?.euler;
+  if (!e) return;
+  panel.timestamp.textContent = `${sample.timestampUs} us`;
+  panel.euler.textContent = `X ${fmt(e.x, 2)} / Y ${fmt(e.y, 2)} / Z ${fmt(e.z, 2)}`;
+}
+
+function updateMetrics(sourceSegment = '') {
+  const thighPitch = estimator.thighPitchDeg;
+  const shankPitch = estimator.shankPitchDeg;
+  const rawAngle = estimator.rawAngleDeg;
+  const unfilteredAngle = estimator.unfilteredKneeAngleDeg;
+  const kneeAngle = estimator.kneeAngleDeg;
+
+  ui.thighPitch.textContent = `${fmt(thighPitch)} deg`;
+  ui.shankPitch.textContent = `${fmt(shankPitch)} deg`;
+  ui.rawAngle.textContent = `${fmt(rawAngle)} deg`;
+  ui.unfilteredAngle.textContent = `${fmt(unfilteredAngle)} deg`;
+  ui.zeroOffset.textContent = `${fmt(estimator.zeroOffsetDeg)} deg`;
+
+  if (Number.isFinite(kneeAngle)) {
+    chart.push(kneeAngle);
+    maybeLog(sourceSegment);
+  }
+}
+
+function maybeLog(sourceSegment) {
+  if (!isLogging || !estimator.ready) return;
+
+  const thighBattery = getBatteryForSegment('thigh');
+  const shankBattery = getBatteryForSegment('shank');
+
+  logRows.push({
+    iso_time: new Date().toISOString(),
+    session_name: ui.sessionNameInput.value.trim(),
+    source_segment: sourceSegment,
+    knee_angle_deg: estimator.kneeAngleDeg,
+    knee_angle_filtered_deg: estimator.filteredKneeAngleDeg,
+    knee_angle_unfiltered_deg: estimator.unfilteredKneeAngleDeg,
+    raw_angle_deg: estimator.rawAngleDeg,
+    thigh_pitch_deg: estimator.thighPitchDeg,
+    shank_pitch_deg: estimator.shankPitchDeg,
+    thigh_timestamp_us: estimator.latest.thigh?.timestampUs ?? '',
+    shank_timestamp_us: estimator.latest.shank?.timestampUs ?? '',
+    thigh_battery_percent: thighBattery?.levelPercent ?? '',
+    shank_battery_percent: shankBattery?.levelPercent ?? '',
+    thigh_charging: chargingLabel(thighBattery),
+    shank_charging: chargingLabel(shankBattery),
+    zero_offset_deg: estimator.zeroOffsetDeg,
+    smoothing_percent: estimator.smoothingPercent,
+    axis: estimator.axis,
+    inverted: estimator.inverted,
+  });
+  updateLoggingStatus();
+}
+
+function attachSensorEvents(segment) {
+  const sensor = sensors[segment];
+
+  sensor.addEventListener('status', (event) => {
+    const detail = event.detail;
+    ui[segment].name.textContent = detail.name ?? '--';
+    const label = detail.state === 'streaming'
+      ? 'Streaming'
+      : detail.state === 'connected'
+        ? 'Connected'
+        : 'Disconnected';
+    setStatus(segment, label, detail.state);
+  });
+
+  sensor.addEventListener('battery', (event) => {
+    updateBatteryPanel(segment, event.detail);
+  });
+
+  sensor.addEventListener('sample', (event) => {
+    const { sample } = event.detail;
+    estimator.update(segment, sample);
+    updateSensorPanel(segment, sample);
+    updateMetrics(segment);
+  });
+
+  sensor.addEventListener('error', (event) => showError(event.detail));
+}
+
+async function connectSegment(segment) {
+  try {
+    setStatus(segment, 'Selecting...', 'connecting');
+    await sensors[segment].requestAndConnect();
+    ui[segment].name.textContent = sensors[segment].name;
+    if (ui.autoStart.checked) {
+      await sensors[segment].startStreaming();
+    }
+  } catch (error) {
+    setStatus(segment, sensors[segment].connected ? 'Connected' : 'Disconnected', sensors[segment].connected ? 'connected' : 'disconnected');
+    showError(error);
+  }
+}
+
+async function startSegment(segment) {
+  try {
+    await sensors[segment].startStreaming();
+  } catch (error) {
+    showError(error);
+  }
+}
+
+async function stopSegment(segment) {
+  try {
+    await sensors[segment].stopStreaming();
+  } catch (error) {
+    showError(error);
+  }
+}
+
+async function startBoth() {
+  await Promise.allSettled(['thigh', 'shank'].map((segment) => startSegment(segment)));
+}
+
+async function stopBoth() {
+  await Promise.allSettled(['thigh', 'shank'].map((segment) => stopSegment(segment)));
+}
+
+function buildCsv() {
+  if (logRows.length === 0) return null;
+
+  const headers = Object.keys(logRows[0]);
+  const lines = [headers.join(',')];
+  for (const row of logRows) {
+    lines.push(headers.map((h) => JSON.stringify(row[h] ?? '')).join(','));
+  }
+  return lines.join('\n');
+}
+
+function downloadCsvBlob(csvText, fileName) {
+  const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function chooseFolder() {
+  if (!('showDirectoryPicker' in window)) {
+    updateFolderStatus();
+    return;
+  }
+
+  try {
+    directoryHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    updateFolderStatus();
+  } catch (error) {
+    if (error?.name !== 'AbortError') showError(error);
+  }
+}
+
+async function saveCsv() {
+  const csvText = buildCsv();
+  if (!csvText) {
+    updateLoggingStatus('No rows to save yet.');
+    return;
+  }
+
+  const fileName = getCsvFileName();
+
+  if (directoryHandle) {
+    try {
+      const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(csvText);
+      await writable.close();
+      ui.logStatus.textContent = `Saved ${fileName}.`;
+      ui.logStatus.hidden = false;
+      updateFolderStatus();
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+      showError(error);
+      ui.folderStatus.textContent = 'Could not write to the selected folder. Falling back to browser download.';
+    }
+  }
+
+  downloadCsvBlob(csvText, fileName);
+  ui.logStatus.textContent = `Downloaded ${fileName}.`;
+  ui.logStatus.hidden = false;
+}
+
+
+function analysisOptions() {
+  return {
+    flexionDirection: ui.flexionDirectionSelect.value,
+    minRomDeg: Math.max(1, Number(ui.minRomInput.value) || 10),
+    minRepDurationSec: Math.max(0.1, Number(ui.minRepDurationInput.value) || 0.5),
+    smoothingWindow: Math.max(1, Math.floor(Number(ui.analysisSmoothingInput.value) || 5)),
+    movementThresholdDegS: Math.max(0, Number(ui.movementThresholdInput.value) || 5),
+  };
+}
+
+function setAnalysisStatus(message = '', state = 'info') {
+  ui.analysisStatus.textContent = message;
+  ui.analysisStatus.hidden = !message;
+  ui.analysisStatus.dataset.state = state;
+}
+
+function makeElement(tag, text = '', className = '') {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (text !== null && text !== undefined) el.textContent = text;
+  return el;
+}
+
+function replaceAnalysisTableRows(rows) {
+  const tbody = ui.analysisTable.querySelector('tbody');
+  tbody.replaceChildren(...rows);
+}
+
+function clearAnalysisResults(message) {
+  latestAnalysisResult = null;
+  latestAnalysisSourceName = '';
+  ui.exportAnalysisBtn.disabled = true;
+  ui.analysisSummary.replaceChildren();
+  analysisChart.clear(message);
+  const row = document.createElement('tr');
+  const cell = document.createElement('td');
+  cell.colSpan = 11;
+  cell.textContent = message;
+  row.appendChild(cell);
+  replaceAnalysisTableRows([row]);
+}
+
+function summaryCard(label, value) {
+  const card = makeElement('div', '', 'analysis-summary-card');
+  card.appendChild(makeElement('span', label));
+  card.appendChild(makeElement('strong', value));
+  return card;
+}
+
+function fmtUnit(value, unit, digits = 1) {
+  return Number.isFinite(value) ? `${fmt(value, digits)} ${unit}` : '--';
+}
+
+function renderAnalysisResult(result, sourceName) {
+  latestAnalysisResult = result;
+  latestAnalysisSourceName = sourceName || 'analysis';
+  ui.exportAnalysisBtn.disabled = result.reps.length === 0;
+
+  const summary = result.summary;
+  ui.analysisSummary.replaceChildren(
+    summaryCard('Repetitions', String(summary.repetitionCount)),
+    summaryCard('Peak flexion', fmtUnit(summary.overallPeakFlexionDeg, 'deg')),
+    summaryCard('Peak extension', fmtUnit(summary.overallPeakExtensionDeg, 'deg')),
+    summaryCard('Mean ROM', fmtUnit(summary.meanRangeOfMotionDeg, 'deg')),
+    summaryCard('Mean ext. angular speed', fmtUnit(summary.meanExtensionSpeedDegS, 'deg/s')),
+    summaryCard('Mean flex. angular speed', fmtUnit(summary.meanFlexionSpeedDegS, 'deg/s')),
+    summaryCard('Mean movement angular speed', fmtUnit(summary.meanMovementSpeedDegS, 'deg/s')),
+  );
+
+  if (result.reps.length === 0) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 11;
+    cell.textContent = 'No complete repetitions detected. Try lowering Minimum ROM or Minimum rep duration, or switch the flexion convention.';
+    row.appendChild(cell);
+    replaceAnalysisTableRows([row]);
+  } else {
+    const rows = result.reps.map((rep) => {
+      const row = document.createElement('tr');
+      const cells = [
+        String(rep.rep),
+        `${fmt(rep.extensionStartDeg)} deg @ ${fmt(rep.extensionStartTimeSec, 2)} s`,
+        `${fmt(rep.extensionEndDeg)} deg @ ${fmt(rep.extensionEndTimeSec, 2)} s`,
+        `${fmt(rep.extensionRomDeg)} deg`,
+        `${fmt(rep.flexionStartDeg)} deg @ ${fmt(rep.flexionStartTimeSec, 2)} s`,
+        `${fmt(rep.flexionEndDeg)} deg @ ${fmt(rep.flexionEndTimeSec, 2)} s`,
+        `${fmt(rep.flexionRomDeg)} deg`,
+        `${fmt(rep.rangeOfMotionDeg)} deg`,
+        `${fmt(rep.meanExtensionSpeedDegS)} deg/s`,
+        `${fmt(rep.meanFlexionSpeedDegS)} deg/s`,
+        `${fmt(rep.meanMovementSpeedDegS)} deg/s`,
+      ];
+      for (const text of cells) row.appendChild(makeElement('td', text));
+      return row;
+    });
+    replaceAnalysisTableRows(rows);
+  }
+
+  analysisChart.render(result);
+  setAnalysisStatus(`Analyzed file: ${sourceName || 'current log'}.`, 'success');
+}
+
+async function analyzeCsvText(csvText, sourceName) {
+  clearAnalysisResults('Analyzing movement...');
+  setAnalysisStatus('Analyzing movement...', 'info');
+
+  try {
+    const result = analyzeKneeAngleCsv(csvText, analysisOptions());
+    renderAnalysisResult(result, sourceName);
+  } catch (error) {
+    clearAnalysisResults(error?.message ?? 'Could not analyze this CSV.');
+    setAnalysisStatus(error?.message ?? 'Could not analyze this CSV.', 'error');
+  }
+}
+
+async function analyzeSelectedCsvFile() {
+  const file = ui.analysisFileInput.files?.[0];
+  if (!file) {
+    clearAnalysisResults('Choose a saved CSV file first.');
+    setAnalysisStatus('Choose a saved CSV file first.', 'error');
+    return;
+  }
+
+  try {
+    const text = await file.text();
+    await analyzeCsvText(text, file.name);
+  } catch (error) {
+    clearAnalysisResults(error?.message ?? 'Could not read the selected file.');
+    setAnalysisStatus(error?.message ?? 'Could not read the selected file.', 'error');
+  }
+}
+
+async function analyzeCurrentLog() {
+  const csvText = buildCsv();
+  if (!csvText) {
+    clearAnalysisResults('No current log rows are available. Start logging first or choose a saved CSV.');
+    setAnalysisStatus('No current log rows are available.', 'error');
+    return;
+  }
+  await analyzeCsvText(csvText, 'current unsaved log');
+}
+
+function sanitizedBaseName(name) {
+  const fallback = `xsens-dot-knee-analysis-${localTimestampForFileName()}`;
+  const raw = String(name || fallback).replace(/\.[^.]+$/, '');
+  const sanitized = raw
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, '_')
+    .replace(/\s+/g, '_')
+    .replace(/^\.+/, '')
+    .slice(0, 160);
+  return sanitized || fallback;
+}
+
+async function exportAnalysisCsv() {
+  if (!latestAnalysisResult || latestAnalysisResult.reps.length === 0) {
+    setAnalysisStatus('No repetition metrics to save yet.', 'error');
+    return;
+  }
+
+  const csvText = repetitionMetricsToCsv(latestAnalysisResult.reps);
+  const fileName = `${sanitizedBaseName(latestAnalysisSourceName)}-analysis.csv`;
+
+  if (directoryHandle) {
+    try {
+      const fileHandle = await directoryHandle.getFileHandle(fileName, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(csvText);
+      await writable.close();
+      setAnalysisStatus(`Analysis saved to ${fileName}.`, 'success');
+      return;
+    } catch (error) {
+      if (error?.name === 'AbortError') return;
+      showError(error);
+      setAnalysisStatus('Could not write analysis to the selected folder. Downloading instead.', 'error');
+    }
+  }
+
+  downloadCsvBlob(csvText, fileName);
+  setAnalysisStatus(`Analysis downloaded as ${fileName}.`, 'success');
+}
+
+
+function updateLoggingStatus(message = '') {
+  if (isLogging) {
+    ui.logStatus.textContent = '● Logging';
+    ui.logStatus.hidden = false;
+    ui.logStatus.dataset.state = 'active';
+  } else if (message) {
+    ui.logStatus.textContent = message;
+    ui.logStatus.hidden = false;
+    ui.logStatus.dataset.state = 'info';
+  } else {
+    ui.logStatus.textContent = '';
+    ui.logStatus.hidden = true;
+    ui.logStatus.dataset.state = 'idle';
+  }
+}
+
+function toggleLogging() {
+  isLogging = !isLogging;
+  ui.logBtn.textContent = isLogging ? 'Stop CSV logging' : 'Start CSV logging';
+  updateLoggingStatus();
+}
+
+function fakeSample(yDeg) {
+  return {
+    timestampUs: Math.floor(performance.now() * 1000),
+    receivedAtMs: performance.now(),
+    euler: { x: 0, y: yDeg, z: 0 },
+  };
+}
+
+function fakeBattery(levelPercent, isCharging = false) {
+  return {
+    levelPercent,
+    chargingStatus: isCharging ? 1 : 0,
+    isCharging,
+    receivedAtMs: performance.now(),
+  };
+}
+
+function toggleMockStream() {
+  if (mockTimer) {
+    clearInterval(mockTimer);
+    mockTimer = null;
+    mockBatteries = { thigh: null, shank: null };
+    ui.mockBtn.textContent = 'Start mock stream';
+    setStatus('thigh', sensors.thigh.connected ? 'Connected' : 'Disconnected', sensors.thigh.connected ? 'connected' : 'disconnected');
+    setStatus('shank', sensors.shank.connected ? 'Connected' : 'Disconnected', sensors.shank.connected ? 'connected' : 'disconnected');
+    updateBatteryPanel('thigh', { battery: sensors.thigh.latestBattery, available: Boolean(sensors.thigh.latestBattery) });
+    updateBatteryPanel('shank', { battery: sensors.shank.latestBattery, available: Boolean(sensors.shank.latestBattery) });
+    return;
+  }
+
+  const startedAt = performance.now();
+  mockBatteries = {
+    thigh: fakeBattery(92),
+    shank: fakeBattery(89),
+  };
+  setStatus('thigh', 'Mock streaming', 'streaming');
+  setStatus('shank', 'Mock streaming', 'streaming');
+  ui.thigh.name.textContent = 'Mock thigh DOT';
+  ui.shank.name.textContent = 'Mock shank DOT';
+  updateBatteryPanel('thigh', { battery: mockBatteries.thigh, available: true });
+  updateBatteryPanel('shank', { battery: mockBatteries.shank, available: true });
+  ui.mockBtn.textContent = 'Stop mock stream';
+
+  mockTimer = setInterval(() => {
+    const t = (performance.now() - startedAt) / 1000;
+    const thighJitter = (Math.random() - 0.5) * 1.2;
+    const shankJitter = (Math.random() - 0.5) * 1.2;
+    const thigh = 8 * Math.sin(t * 1.2) + thighJitter;
+    const relativeFlexion = 35 + 25 * Math.sin(t * 2.4);
+    const shank = thigh - relativeFlexion + shankJitter;
+
+    mockBatteries.thigh = fakeBattery(Math.max(0, 92 - Math.floor(t / 120)));
+    mockBatteries.shank = fakeBattery(Math.max(0, 89 - Math.floor(t / 120)));
+    updateBatteryPanel('thigh', { battery: mockBatteries.thigh, available: true });
+    updateBatteryPanel('shank', { battery: mockBatteries.shank, available: true });
+
+    const thighSample = fakeSample(thigh);
+    const shankSample = fakeSample(shank);
+
+    estimator.update('thigh', thighSample);
+    estimator.update('shank', shankSample);
+    updateSensorPanel('thigh', thighSample);
+    updateSensorPanel('shank', shankSample);
+    updateMetrics('mock');
+  }, 1000 / 60);
+}
+
+function bindUi() {
+  attachSensorEvents('thigh');
+  attachSensorEvents('shank');
+
+  ui.thigh.connect.addEventListener('click', () => connectSegment('thigh'));
+  ui.shank.connect.addEventListener('click', () => connectSegment('shank'));
+  ui.thigh.start.addEventListener('click', () => startSegment('thigh'));
+  ui.shank.start.addEventListener('click', () => startSegment('shank'));
+  ui.thigh.stop.addEventListener('click', () => stopSegment('thigh'));
+  ui.shank.stop.addEventListener('click', () => stopSegment('shank'));
+
+  ui.startAllBtn.addEventListener('click', startBoth);
+  ui.stopAllBtn.addEventListener('click', stopBoth);
+
+  ui.axisSelect.addEventListener('change', (event) => {
+    estimator.setAxis(event.target.value);
+    chart.clear();
+    updateMetrics('axis-change');
+  });
+
+  ui.smoothingRange.addEventListener('input', (event) => {
+    estimator.setSmoothingPercent(event.target.value);
+    updateSmoothingLabel();
+    updateMetrics('smoothing-change');
+  });
+
+  ui.invertSign.addEventListener('change', (event) => {
+    estimator.setInverted(event.target.checked);
+    chart.clear();
+    updateMetrics('invert-change');
+  });
+
+  ui.calibrateBtn.addEventListener('click', () => {
+    try {
+      estimator.calibrateZero();
+      chart.clear();
+      updateMetrics('zero-calibration');
+    } catch (error) {
+      showError(error);
+    }
+  });
+
+  ui.resetZeroBtn.addEventListener('click', () => {
+    estimator.resetZero();
+    chart.clear();
+    updateMetrics('zero-reset');
+  });
+
+  ui.resetFilterBtn.addEventListener('click', () => {
+    estimator.resetFilterToCurrent();
+    updateMetrics('filter-reset');
+  });
+
+  ui.fileNameInput.addEventListener('input', updateFolderStatus);
+  ui.chooseFolderBtn.addEventListener('click', chooseFolder);
+  ui.logBtn.addEventListener('click', toggleLogging);
+  ui.downloadBtn.addEventListener('click', saveCsv);
+  ui.mockBtn.addEventListener('click', toggleMockStream);
+  ui.clearBtn.addEventListener('click', () => chart.clear());
+  ui.analyzeFileBtn.addEventListener('click', analyzeSelectedCsvFile);
+  ui.analyzeCurrentLogBtn.addEventListener('click', analyzeCurrentLog);
+  ui.exportAnalysisBtn.addEventListener('click', exportAnalysisCsv);
+  ui.analysisFileInput.addEventListener('change', () => {
+    const file = ui.analysisFileInput.files?.[0];
+    if (file) setAnalysisStatus(`Selected file: ${file.name}.`, 'info');
+  });
+}
+
+ui.fileNameInput.value = defaultCsvName();
+ui.smoothingRange.value = String(DEFAULT_SMOOTHING_PERCENT);
+updateBrowserSupport();
+updateSmoothingLabel();
+updateFolderStatus();
+updateLoggingStatus();
+setAnalysisStatus();
+updateBatteryPanel('thigh');
+updateBatteryPanel('shank');
+bindUi();
+updateMetrics();
+    </script>
+  </body>
+</html>
